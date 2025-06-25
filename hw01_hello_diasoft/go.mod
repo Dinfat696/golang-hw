@@ -1,4 +1,4 @@
-module github.com/Dinfat696/hw01_hello_diasoft
+module github.com/Dinfat696/golang-hw/hw01_hello_diasoft
 
 go 1.19
 

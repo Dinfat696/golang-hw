@@ -16,41 +16,39 @@ func Unpack(s string) (string, error) {
 	for i := 0; i < n; i++ {
 		ch := runes[i]
 
-		if ch == '\\' {
+		switch {
+		case ch == '\\':
 			if i+1 >= n {
 				return "", ErrInvalidString
 			}
 			result.WriteRune(runes[i+1])
 			i++
 			continue
-		}
 
-		if !unicode.IsDigit(ch) {
-			result.WriteRune(ch)
-			continue
-		}
-
-		if i == 0 || (i > 0 && unicode.IsDigit(runes[i-1])) {
-			return "", ErrInvalidString
-		}
-
-		count := int(ch - '0')
-		if count == 0 {
-			if result.Len() == 0 {
+		case unicode.IsDigit(ch):
+			if i == 0 || (i > 0 && unicode.IsDigit(runes[i-1])) {
 				return "", ErrInvalidString
 			}
-			current := result.String()
-			result.Reset()
-			result.WriteString(current[:len(current)-1])
-			continue
-		}
 
-		if i == 0 {
-			return "", ErrInvalidString
-		}
-		prevChar := runes[i-1]
-		for j := 1; j < count; j++ {
-			result.WriteRune(prevChar)
+			count := int(ch - '0')
+			if count == 0 {
+				if result.Len() == 0 {
+					return "", ErrInvalidString
+				}
+				current := result.String()
+				result.Reset()
+				result.WriteString(current[:len(current)-1])
+				continue
+			}
+
+			if i == 0 {
+				return "", ErrInvalidString
+			}
+			prevChar := runes[i-1]
+			result.WriteString(strings.Repeat(string(prevChar), count-1))
+
+		default:
+			result.WriteRune(ch)
 		}
 	}
 

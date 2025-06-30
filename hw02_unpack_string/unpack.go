@@ -13,6 +13,7 @@ func Unpack(s string) (string, error) {
 	runes := []rune(s)
 	n := len(runes)
 
+	
 	for i := 0; i < n; i++ {
 		ch := runes[i]
 

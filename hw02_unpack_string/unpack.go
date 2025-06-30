@@ -13,50 +13,44 @@ func Unpack(s string) (string, error) {
 	runes := []rune(s)
 	n := len(runes)
 
-	
 	for i := 0; i < n; i++ {
 		ch := runes[i]
 
-	
 		if ch == '\\' {
 			if i+1 >= n {
 				return "", ErrInvalidString
 			}
-		
 			result.WriteRune(runes[i+1])
-			i++ 
+			i++
 			continue
 		}
 
+		if !unicode.IsDigit(ch) {
+			result.WriteRune(ch)
+			continue
+		}
 
-		if unicode.IsDigit(ch) {
+		if i == 0 || (i > 0 && unicode.IsDigit(runes[i-1])) {
+			return "", ErrInvalidString
+		}
 
-			if i == 0 || (i > 0 && unicode.IsDigit(runes[i-1])) {
+		count := int(ch - '0')
+		if count == 0 {
+			if result.Len() == 0 {
 				return "", ErrInvalidString
 			}
+			current := result.String()
+			result.Reset()
+			result.WriteString(current[:len(current)-1])
+			continue
+		}
 
-			count := int(ch - '0')
-			if count == 0 {
-
-				if result.Len() == 0 {
-					return "", ErrInvalidString
-				}
-				current := result.String()
-				result.Reset()
-				result.WriteString(current[:len(current)-1])
-			} else {
-
-				if i == 0 {
-					return "", ErrInvalidString
-				}
-				prevChar := runes[i-1]
-				for j := 1; j < count; j++ {
-					result.WriteRune(prevChar)
-				}
-			}
-		} else {
-
-			result.WriteRune(ch)
+		if i == 0 {
+			return "", ErrInvalidString
+		}
+		prevChar := runes[i-1]
+		for j := 1; j < count; j++ {
+			result.WriteRune(prevChar)
 		}
 	}
 

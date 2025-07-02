@@ -1,4 +1,5 @@
 package hw03frequencyanalysis
+ipackage hw03frequencyanalysis
 
 import (
 	"sort"
@@ -6,13 +7,13 @@ import (
 )
 
 func Top10(text string) []string {
-	if text == "" {
+	if len(text) == 0 {
 		return nil
 	}
 
 	words := strings.Fields(text)
+	freq := make(map[string]int, len(words))
 
-	freq := make(map[string]int)
 	for _, word := range words {
 		freq[word]++
 	}
@@ -22,7 +23,7 @@ func Top10(text string) []string {
 		count int
 	}
 
-	var wordCounts []wordCount
+	wordCounts := make([]wordCount, 0, len(freq))
 	for word, count := range freq {
 		wordCounts = append(wordCounts, wordCount{word, count})
 	}
@@ -34,10 +35,16 @@ func Top10(text string) []string {
 		return wordCounts[i].count > wordCounts[j].count
 	})
 
-	result := make([]string, 0, 10)
-	for i := 0; i < len(wordCounts) && i < 10; i++ {
+	resultSize := 10
+	if len(wordCounts) < resultSize {
+		resultSize = len(wordCounts)
+	}
+	result := make([]string, 0, resultSize)
+	for i := 0; i < resultSize; i++ {
 		result = append(result, wordCounts[i].word)
 	}
 
 	return result
 }
+
+var taskWithAsteriskIsCompleted = false

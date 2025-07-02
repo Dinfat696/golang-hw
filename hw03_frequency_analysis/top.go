@@ -1,5 +1,4 @@
 package hw03frequencyanalysis
-ipackage hw03frequencyanalysis
 
 import (
 	"sort"
@@ -46,5 +45,3 @@ func Top10(text string) []string {
 
 	return result
 }
-
-var taskWithAsteriskIsCompleted = false

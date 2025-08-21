@@ -28,7 +28,7 @@ func Run(tasks []Task, n, m int) error {
 	tasksChan := make(chan Task, len(tasks))
 	doneChan := make(chan struct{})
 	var wg sync.WaitGroup
-	
+
 	go func() {
 		fmt.Printf("[PRODUCER] Started, total tasks: %d\n", len(tasks))
 		start := time.Now()
@@ -39,7 +39,7 @@ func Run(tasks []Task, n, m int) error {
 		close(tasksChan)
 		fmt.Printf("[PRODUCER] Finished in %v\n", time.Since(start))
 	}()
-	
+
 	for i := 0; i < n; i++ {
 		wg.Add(1)
 		go func(workerID int) {
@@ -65,7 +65,7 @@ func Run(tasks []Task, n, m int) error {
 			}
 		}(i + 1)
 	}
-	
+
 	go func() {
 		wg.Wait()
 		close(doneChan)

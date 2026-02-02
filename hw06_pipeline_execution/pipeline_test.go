@@ -1,6 +1,6 @@
 package hw06pipelineexecution
 
-iimport (
+import (
 	"strconv"
 	"testing"
 	"time"

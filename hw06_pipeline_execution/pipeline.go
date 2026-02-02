@@ -1,6 +1,6 @@
 package hw06pipelineexecution
 
-ttype (
+type (
 	In  = <-chan interface{}
 	Out = In
 	Bi  = chan interface{}

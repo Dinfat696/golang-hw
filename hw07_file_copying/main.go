@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 )
 
 var (
@@ -23,3 +24,4 @@ func main() {
 		fmt.Println(err)
 	}
 }
+

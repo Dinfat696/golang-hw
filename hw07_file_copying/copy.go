@@ -12,7 +12,7 @@ var (
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 )
 
-func Copy(fromPath, toPath string, offset, limit int64) error {
+func Copy(fromPath, toPath string, limit, offset int64) error {
 	src, err := os.Open(fromPath)
 	if err != nil {
 		return err
@@ -25,6 +25,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 
 	size := stat.Size()
+
 	if offset > size {
 		return ErrOffsetExceedsFileSize
 	}
@@ -36,8 +37,10 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		}
 	}
 
-	bytesToCopy := size - offset
-	if limit > 0 && limit < bytesToCopy {
+	maxAvailable := size - offset
+	bytesToCopy := maxAvailable
+
+	if limit > 0 && limit < maxAvailable {
 		bytesToCopy = limit
 	}
 
@@ -47,8 +50,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 	defer dst.Close()
 
-	const bufSize = 4096
-	buf := make([]byte, bufSize)
+	const bufSize = 1024
 	var copied int64
 
 	for copied < bytesToCopy {
@@ -58,7 +60,10 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 			readSize = int(remaining)
 		}
 
-		n, err := src.Read(buf[:readSize])
+		buf := make([]byte, readSize)
+
+		n, err := src.Read(buf)
+
 		if n > 0 {
 			_, writeErr := dst.Write(buf[:n])
 			if writeErr != nil {
@@ -66,8 +71,8 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 			}
 			copied += int64(n)
 
-			percent := float64(copied) / float64(bytesToCopy) * 100
-			fmt.Printf("\rProgress: %.2f%%", percent)
+			percent := int(float64(copied) / float64(bytesToCopy) * 100)
+			fmt.Printf("\rProgress: %d%%", percent)
 		}
 
 		if err == io.EOF {

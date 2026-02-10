@@ -1,3 +1,5 @@
+// Package models provides functionality for models.
+// Package models contains data structures.
 package models
 
 import "time"

@@ -53,7 +53,7 @@ func (r *SQLStorage) Create(event models.Event) (id int64, err error) {
 }
 
 func (r *SQLStorage) Update(event models.Event) {
-	r.db.Query(
+	_, _ = _, _ = r.db.Query(
 		"UPDATE event SET title =$1, date_time = $2 WHERE id = $3", event.Title, event.DateTime, event.ID)
 }
 

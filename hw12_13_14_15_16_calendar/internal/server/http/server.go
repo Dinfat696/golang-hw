@@ -12,6 +12,8 @@ import (
 	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
 )
 
+// Server handles HTTP requests.
+
 type Server struct {
 	host        string
 	port        int
@@ -74,12 +76,12 @@ func (s *Server) Stop(ctx context.Context) error {
 
 func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.Body.Close())
-	fmt.Fprintf(w, "Hello, World!")
+	_, _ = fmt.Fprintf(w, "Hello, World!")
 }
 
 func hello(w http.ResponseWriter, req *http.Request) {
 	fmt.Println(req.Body.Close())
-	fmt.Fprintf(w, "hello\n")
+	_, _ = fmt.Fprintf(w, "hello\n")
 }
 
 func headers(w http.ResponseWriter, req *http.Request) {

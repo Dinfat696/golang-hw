@@ -1,3 +1,5 @@
+// Package app provides functionality for app.
+// Package app provides calendar application logic.
 package app
 
 import (
@@ -8,6 +10,8 @@ import (
 	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/basic"
 	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/models"
 )
+// App represents the main application structure.
+
 
 type App struct {
 	Logger  logger.Logger

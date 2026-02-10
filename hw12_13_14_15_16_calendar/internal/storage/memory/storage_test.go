@@ -79,7 +79,7 @@ func TestMemoryStorage_Delete(t *testing.T) {
 		t.Errorf("remaining event ID = %d, want %d", all[0].ID, id2)
 	}
 
-	memStorage.DeleteByID(id2)
+	_ = _ = memStorage.DeleteByID(id2)
 	all = memStorage.FindAll()
 	if len(all) != 0 {
 		t.Errorf("after DeleteByID, len = %d, want 0", len(all))
@@ -136,9 +136,9 @@ func TestMemoryStorage_FindEventsByWeek(t *testing.T) {
 	mon := wed.Add(-2 * 24 * time.Hour)
 	sun := wed.Add(4 * 24 * time.Hour)
 	nextMon := wed.Add(7 * 24 * time.Hour)
-	memStorage.Create(newEvent("Mon", mon))
-	memStorage.Create(newEvent("Wed", wed))
-	memStorage.Create(newEvent("Sun", sun))
+	_, _ = _, _ = memStorage.Create(newEvent("Mon", mon))
+	_, _ = _, _ = memStorage.Create(newEvent("Wed", wed))
+	_, _ = _, _ = memStorage.Create(newEvent("Sun", sun))
 	memStorage.Create(newEvent("NextMon", nextMon))
 
 	res, _ := memStorage.FindEventsByWeek(wed)

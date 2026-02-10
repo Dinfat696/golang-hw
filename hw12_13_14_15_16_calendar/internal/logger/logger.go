@@ -2,6 +2,8 @@ package logger
 
 import "fmt"
 
+// Logger handles application logging.
+
 type Logger struct {
 	level    string
 	location string

@@ -1,3 +1,5 @@
+// Package basic provides functionality for basic.
+// Package basic defines storage interfaces.
 package basic
 
 import (

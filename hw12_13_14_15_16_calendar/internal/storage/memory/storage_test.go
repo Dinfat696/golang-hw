@@ -79,7 +79,7 @@ func TestMemoryStorage_Delete(t *testing.T) {
 		t.Errorf("remaining event ID = %d, want %d", all[0].ID, id2)
 	}
 
-	_ = _ = memStorage.DeleteByID(id2)
+	_ = memStorage.DeleteByID(id2)
 	all = memStorage.FindAll()
 	if len(all) != 0 {
 		t.Errorf("after DeleteByID, len = %d, want 0", len(all))
@@ -136,10 +136,10 @@ func TestMemoryStorage_FindEventsByWeek(t *testing.T) {
 	mon := wed.Add(-2 * 24 * time.Hour)
 	sun := wed.Add(4 * 24 * time.Hour)
 	nextMon := wed.Add(7 * 24 * time.Hour)
-	_, _ = _, _ = memStorage.Create(newEvent("Mon", mon))
-	_, _ = _, _ = memStorage.Create(newEvent("Wed", wed))
-	_, _ = _, _ = memStorage.Create(newEvent("Sun", sun))
-	memStorage.Create(newEvent("NextMon", nextMon))
+	_, _ = memStorage.Create(newEvent("Mon", mon))
+	_, _ = memStorage.Create(newEvent("Wed", wed))
+	_, _ = memStorage.Create(newEvent("Sun", sun))
+	_, _ = memStorage.Create(newEvent("NextMon", nextMon))
 
 	res, _ := memStorage.FindEventsByWeek(wed)
 	if len(res) != 3 {
@@ -154,9 +154,9 @@ func TestMemoryStorage_FindEventsByMonth(t *testing.T) {
 	dec31 := time.Date(2025, 12, 31, 23, 59, 59, 0, time.UTC)
 	jan1 := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 
-	memStorage.Create(newEvent("Dec 3", dec3))
-	memStorage.Create(newEvent("Dec 31", dec31))
-	memStorage.Create(newEvent("Jan 1", jan1))
+	_, _ = memStorage.Create(newEvent("Dec 3", dec3))
+	_, _ = memStorage.Create(newEvent("Dec 31", dec31))
+	_, _ = memStorage.Create(newEvent("Jan 1", jan1))
 
 	res, _ := memStorage.FindEventsByMonth(dec3)
 	if len(res) != 2 {

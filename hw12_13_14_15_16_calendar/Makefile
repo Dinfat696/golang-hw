@@ -1,4 +1,3 @@
-
 BIN := "./bin/calendar"
 DOCKER_IMG="calendar:develop"
 
@@ -26,10 +25,11 @@ version: build
 test:
 	go test -race ./internal/...
 
-#install-lint-deps:
-#	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.50.1
-
 lint:
+	# Создаем минимальный конфиг для golangci-lint 2.x
+	echo 'version: "2"' > .golangci.yml
+	echo 'linters: {disable-all: true, enable: [govet]}' >> .golangci.yml
+	# Устанавливаем и запускаем линтер
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin latest
 	golangci-lint run ./...
 

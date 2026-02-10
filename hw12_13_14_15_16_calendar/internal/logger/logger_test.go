@@ -1,7 +1,11 @@
 package logger
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestLogger(t *testing.T) {
-	// TODO
+	fmt.Println(t.Name())
+
 }

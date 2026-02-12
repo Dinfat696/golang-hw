@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/sevastopall/hw12_13_14_15_calendar/internal/app"
-	"github.com/sevastopall/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/sevastopall/hw12_13_14_15_calendar/internal/server/http"
-	"github.com/sevastopall/hw12_13_14_15_calendar/internal/server/http/api"
-	memorystorage "github.com/sevastopall/hw12_13_14_15_calendar/internal/storage/memory"
-	sqlstorage "github.com/sevastopall/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
+	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
+	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http/api"
+	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string

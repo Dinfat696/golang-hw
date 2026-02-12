@@ -71,21 +71,21 @@ type ServerInterface interface {
 type Unimplemented struct{}
 
 
-func (_ Unimplemented) GetEvents(w http.ResponseWriter, r *http.Request, params GetEventsParams) {
+func (Unimplemented) GetEvents(w http.ResponseWriter, r *http.Request, params GetEventsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 
-func (_ Unimplemented) PostEvents(w http.ResponseWriter, r *http.Request) {
+func (Unimplemented) PostEvents(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
 
-func (_ Unimplemented) DeleteEventsID(w http.ResponseWriter, r *http.Request, id int64) {
+func (Unimplemented) DeleteEventsID(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-func (_ Unimplemented) PutEventsID(w http.ResponseWriter, r *http.Request, id int64) {
+func (Unimplemented) PutEventsID(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 

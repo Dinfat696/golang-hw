@@ -6,9 +6,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/basic"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/models"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/basic"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/models"
 )
 // App represents the main application structure.
 

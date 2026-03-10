@@ -10,13 +10,13 @@ import (
     "syscall"
     "time"
 
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/config"
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/kafka"
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage"
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/sql"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/config"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/kafka"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/memory"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/sql"
 )
 
 

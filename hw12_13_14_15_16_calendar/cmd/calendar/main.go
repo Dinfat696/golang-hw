@@ -10,12 +10,12 @@ import (
 	"time"
 
 
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"   // для memorystorage
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/sql"      // для sqlstorage
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"      // если internalhttp находится здесь
-    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/api"               // для api.Handler
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/memory"   // для memorystorage
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/sql"      // для sqlstorage
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http"      // если internalhttp находится здесь
+    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/api"               // для api.Handler
 )
 
 

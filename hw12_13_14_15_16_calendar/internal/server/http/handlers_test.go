@@ -11,11 +11,11 @@ import (
 	"time"
 
 	openapi_types "github.com/oapi-codegen/runtime/types"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http/api"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/basic"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/models"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http/api"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/basic"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/models"
 )
 
 type mockStorage struct {

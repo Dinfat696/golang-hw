@@ -5,7 +5,7 @@ package basic
 import (
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/models"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/models"
 )
 
 type Storage interface {

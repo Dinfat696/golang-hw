@@ -8,7 +8,7 @@ import (
 
 
 	"github.com/segmentio/kafka-go"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/models"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
 )
 
 type Consumer struct {

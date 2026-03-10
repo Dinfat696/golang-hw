@@ -27,6 +27,10 @@ test:
 	cd $(MODULE_DIR) && go test -race ./internal/...
 
 lint:
+	@echo "Current directory: $$(pwd)"
+	@echo "Files in current directory:"
+	@ls -la
+	@echo "Trying to cd to $(MODULE_DIR)"
 	cd $(MODULE_DIR) && go mod tidy
 	cd $(MODULE_DIR) && go vet ./...
 	cd $(MODULE_DIR) && go fmt ./...

@@ -24,3 +24,8 @@ func (l *Logger) Info(msg string) {
 func (l *Logger) Error(msg string) {
     l.errorLog.Println(msg)
 }
+
+// NewLogger - алиас для New (совместимость со старым кодом)
+func NewLogger(level string) (*Logger, error) {
+    return New(level, ""), nil
+}

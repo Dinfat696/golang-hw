@@ -124,3 +124,11 @@ func (memStorage *MemoryStorage) FindAll() []models.Event {
 	}
 	return result
 }
+
+func (s *MemoryStorage) Close() error {
+    return nil
+}
+
+func (s *MemoryStorage) Close() error {
+    return nil
+}

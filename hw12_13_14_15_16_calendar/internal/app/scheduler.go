@@ -1,6 +1,7 @@
 package app
 
 import (
+    "strconv"
     "context"
     "fmt"
     "time"
@@ -10,7 +11,6 @@ import (
     "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
     "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
     "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/mq"
-    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage"
 )
 
 type Scheduler struct {
@@ -73,16 +73,16 @@ func (s *Scheduler) processNotifications(ctx context.Context) error {
         if s.shouldNotify(event, now) {
             notification := &models.Notification{
                 ID:         uuid.New().String(),
-                EventID:    event.ID,
+                EventID:    strconv.FormatInt(event.ID, 10),
                 EventTitle: event.Title,
                 UserID:     event.UserID,
-                Message:    fmt.Sprintf("Напоминание: %s начинается в %s", event.Title, event.StartTime.Format("15:04")),
+                Message:    fmt.Sprintf("Напоминание: %s начинается в %s", event.Title, event.DateTime.Format("15:04")),
                 NotifyAt:   time.Now(),
                 CreatedAt:  time.Now(),
             }
 
             if err := s.producer.SendNotification(ctx, notification); err != nil {
-                s.logger.Error(fmt.Sprintf("Failed to send notification for event %s: %v", event.ID, err))
+                s.logger.Error(fmt.Sprintf("Failed to send notification for event %s: %v", strconv.FormatInt(event.ID, 10), err))
                 continue
             }
 
@@ -116,12 +116,12 @@ func (s *Scheduler) cleanupOldEvents(ctx context.Context) error {
 
     deletedCount := 0
     for _, event := range oldEvents {
-        if err := s.app.DeleteEvent(ctx, event.ID); err != nil {
-            s.logger.Error(fmt.Sprintf("Failed to delete old event %s: %v", event.ID, err))
+        if err := s.app.DeleteEvent(ctx, strconv.FormatInt(event.ID, 10)); err != nil {
+            s.logger.Error(fmt.Sprintf("Failed to delete old event %s: %v", strconv.FormatInt(event.ID, 10), err))
             continue
         }
         deletedCount++
-        s.logger.Info(fmt.Sprintf("Deleted old event: %s (created: %s)", event.Title, event.StartTime.Format("2006-01-02")))
+        s.logger.Info(fmt.Sprintf("Deleted old event: %s (created: %s)", event.Title, event.DateTime.Format("2006-01-02")))
     }
 
     if deletedCount > 0 {

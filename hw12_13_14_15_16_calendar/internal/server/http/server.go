@@ -36,13 +36,11 @@ func (s *Server) Start(ctx context.Context) error {
 	srv := &http.Server{
 		Addr:         s.host + ":" + strconv.Itoa(s.port),
 		Handler:      mux,
-		ReadTimeout:  5 * time.Second,  
-		WriteTimeout: 10 * time.Second, 
-		IdleTimeout:  60 * time.Second, 
-		
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
 
-	
 	errCh := make(chan error, 1)
 	go func() {
 		errCh <- srv.ListenAndServe()
@@ -50,7 +48,7 @@ func (s *Server) Start(ctx context.Context) error {
 
 	select {
 	case <-ctx.Done():
-		
+
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
@@ -60,7 +58,7 @@ func (s *Server) Start(ctx context.Context) error {
 		return nil
 
 	case err := <-errCh:
-		
+
 		if !errors.Is(err, http.ErrServerClosed) {
 			return fmt.Errorf("server failed to start or crashed: %w", err)
 		}

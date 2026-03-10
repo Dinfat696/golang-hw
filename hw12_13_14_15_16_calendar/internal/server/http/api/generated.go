@@ -10,19 +10,16 @@ import (
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
 
-
 const (
 	Day   GetEventsParamsPeriod = "day"
 	Month GetEventsParamsPeriod = "month"
 	Week  GetEventsParamsPeriod = "week"
 )
 
-
 type CreateEventRequest struct {
 	Id    int64  `json:"id"`
 	Title string `json:"title"`
 }
-
 
 type Event struct {
 	DateTime time.Time `json:"dateTime"`
@@ -30,34 +27,25 @@ type Event struct {
 	Title    string    `json:"title"`
 }
 
-
 type UpdateEventRequest struct {
 	DateTime time.Time `json:"dateTime"`
 	Title    string    `json:"title"`
 }
 
-
 type GetEventsParams struct {
-
 	Date openapi_types.Date `form:"date" json:"date"`
 
 	Period *GetEventsParamsPeriod `form:"period,omitempty" json:"period,omitempty"`
 }
 
-
 type GetEventsParamsPeriod string
-
 
 type PostEventsJSONRequestBody = CreateEventRequest
 
-
 type PutEventsIdJSONRequestBody = UpdateEventRequest
 
-
 type ServerInterface interface {
-
 	GetEvents(w http.ResponseWriter, r *http.Request, params GetEventsParams)
-
 
 	PostEvents(w http.ResponseWriter, r *http.Request)
 
@@ -66,20 +54,15 @@ type ServerInterface interface {
 	PutEventsID(w http.ResponseWriter, r *http.Request, id int64)
 }
 
-
-
 type Unimplemented struct{}
-
 
 func (Unimplemented) GetEvents(w http.ResponseWriter, r *http.Request, params GetEventsParams) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
 
-
 func (Unimplemented) PostEvents(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 }
-
 
 func (Unimplemented) DeleteEventsID(w http.ResponseWriter, r *http.Request, id int64) {
 	w.WriteHeader(http.StatusNotImplemented)
@@ -97,14 +80,11 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.Handler) http.Handler
 
-
 func (siw *ServerInterfaceWrapper) GetEvents(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
-
 	var params GetEventsParams
-
 
 	if paramValue := r.URL.Query().Get("date"); paramValue != "" {
 
@@ -118,7 +98,6 @@ func (siw *ServerInterfaceWrapper) GetEvents(w http.ResponseWriter, r *http.Requ
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "date", Err: err})
 		return
 	}
-
 
 	err = runtime.BindQueryParameter("form", true, false, "period", r.URL.Query(), &params.Period)
 	if err != nil {
@@ -150,11 +129,9 @@ func (siw *ServerInterfaceWrapper) PostEvents(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
-
 func (siw *ServerInterfaceWrapper) DeleteEventsId(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-
 
 	var id int64
 
@@ -178,7 +155,6 @@ func (siw *ServerInterfaceWrapper) DeleteEventsId(w http.ResponseWriter, r *http
 func (siw *ServerInterfaceWrapper) PutEventsId(w http.ResponseWriter, r *http.Request) {
 
 	var err error
-
 
 	var id int64
 
@@ -268,7 +244,6 @@ func (e *TooManyValuesForParamError) Error() string {
 	return fmt.Sprintf("Expected one value for %s, got %d", e.ParamName, e.Count)
 }
 
-
 func Handler(si ServerInterface) http.Handler {
 	return HandlerWithOptions(si, ChiServerOptions{})
 }
@@ -279,7 +254,6 @@ type ChiServerOptions struct {
 	Middlewares      []MiddlewareFunc
 	ErrorHandlerFunc func(w http.ResponseWriter, r *http.Request, err error)
 }
-
 
 func HandlerFromMux(si ServerInterface, r chi.Router) http.Handler {
 	return HandlerWithOptions(si, ChiServerOptions{
@@ -293,7 +267,6 @@ func HandlerFromMuxWithBaseURL(si ServerInterface, r chi.Router, baseURL string)
 		BaseRouter: r,
 	})
 }
-
 
 func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handler {
 	r := options.BaseRouter

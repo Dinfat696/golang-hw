@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	 "time"
+	"time"
 
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
-	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http/api"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http/api"
 )
 
 type EventsHandler struct {
@@ -30,9 +30,9 @@ func NewEventsHandler(logger *logger.Logger, app *app.App, host string, port int
 
 func (h *EventsHandler) GetEvents(w http.ResponseWriter, r *http.Request, params api.GetEventsParams) {
 	var (
-    events []*models.Event
-    err    error
-)
+		events []*models.Event
+		err    error
+	)
 	date := params.Date.Time
 
 	period := api.Day
@@ -86,11 +86,11 @@ func (h *EventsHandler) PostEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-event := &models.Event{
-    ID:       req.Id,
-    Title:    req.Title,
-    DateTime: time.Now(), // временно, пока не разберемся с полем
-}
+	event := &models.Event{
+		ID:       req.Id,
+		Title:    req.Title,
+		DateTime: time.Now(), // временно, пока не разберемся с полем
+	}
 
 	if err := h.application.CreateEvent(r.Context(), event); err != nil {
 		h.logger.Error("failed to create event: " + err.Error())

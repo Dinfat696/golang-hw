@@ -1,22 +1,20 @@
-
 package main
 
 import (
-    "context"
-    "flag"
-    "log"
-    "os"
-    "os/signal"
-    "syscall"
-    "time"
+	"context"
+	"flag"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
-    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/config"
-    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/kafka"
-    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
-    "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/notifications"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/config"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/kafka"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/notifications"
 )
-
 
 var configFile string
 

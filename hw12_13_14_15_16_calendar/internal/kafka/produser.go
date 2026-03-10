@@ -1,4 +1,3 @@
-
 package kafka
 
 import (
@@ -7,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/segmentio/kafka-go"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
+	"github.com/segmentio/kafka-go"
 )
 
 type Producer struct {

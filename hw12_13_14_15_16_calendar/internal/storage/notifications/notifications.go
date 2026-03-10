@@ -1,4 +1,3 @@
-
 package notifications
 
 import (
@@ -7,9 +6,8 @@ import (
 	"fmt"
 	"time"
 
-
-	_ "github.com/lib/pq"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
+	_ "github.com/lib/pq"
 )
 
 type NotificationStorage interface {

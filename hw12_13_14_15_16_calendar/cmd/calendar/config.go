@@ -6,7 +6,6 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-
 type Config struct {
 	Logger       LoggerConf
 	DbDriverName string

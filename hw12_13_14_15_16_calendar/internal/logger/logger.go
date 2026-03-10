@@ -1,25 +1,26 @@
 package logger
 
-import "fmt"
-
-// Logger handles application logging.
+import (
+    "log"
+    "os"
+)
 
 type Logger struct {
-	level    string
-	location string
+    infoLog  *log.Logger
+    errorLog *log.Logger
 }
 
-func New(level string, location string) *Logger {
-	return &Logger{
-		level:    level,
-		location: location,
-	}
+func New(level, location string) *Logger {
+    return &Logger{
+        infoLog:  log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime),
+        errorLog: log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime),
+    }
 }
 
-func (l Logger) Info(msg string) {
-	fmt.Println(msg)
+func (l *Logger) Info(msg string) {
+    l.infoLog.Println(msg)
 }
 
-func (l Logger) Error(msg string) {
-	fmt.Println(msg)
+func (l *Logger) Error(msg string) {
+    l.errorLog.Println(msg)
 }

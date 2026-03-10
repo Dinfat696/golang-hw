@@ -1,10 +1,11 @@
 package memorystorage
 
 import (
-	"sync"
-	"time"
-
-	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/models"
+    "context"
+    "strconv"
+    "sync"
+    "time"
+   "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
 )
 
 type MemoryStorage struct {
@@ -129,6 +130,31 @@ func (s *MemoryStorage) Close() error {
     return nil
 }
 
-func (s *MemoryStorage) Close() error {
+
+func (s *MemoryStorage) ListEvents(ctx context.Context, from, to time.Time) ([]*models.Event, error) {
+    s.mu.RLock()
+    defer s.mu.RUnlock()
+    var result []*models.Event
+    for _, ev := range s.storage {
+        if ev.DateTime.After(from) && ev.DateTime.Before(to) {
+            result = append(result, &models.Event{
+                ID:       ev.ID,
+                Title:    ev.Title,
+                DateTime: ev.DateTime,
+                // UserID и NotifyAt пока пустые
+            })
+        }
+    }
+    return result, nil
+}
+
+func (s *MemoryStorage) DeleteEvent(ctx context.Context, id string) error {
+    intID, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        return err
+    }
+    s.mu.Lock()
+    defer s.mu.Unlock()
+    delete(s.storage, intID)
     return nil
 }

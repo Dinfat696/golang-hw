@@ -29,3 +29,11 @@ func (l *Logger) Error(msg string) {
 func NewLogger(level string) (*Logger, error) {
     return New(level, ""), nil
 }
+
+func (l *Logger) Fatalf(format string, v ...interface{}) {
+    l.errorLog.Fatalf(format, v...)
+}
+
+func (l *Logger) Errorf(format string, v ...interface{}) {
+    l.errorLog.Printf(format, v...)
+}

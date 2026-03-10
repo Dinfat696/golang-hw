@@ -3,11 +3,13 @@ package internalhttp
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	 "time"
 
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http/api"
-	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/models"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
 )
 
 type EventsHandler struct {
@@ -26,13 +28,11 @@ func NewEventsHandler(logger *logger.Logger, app *app.App, host string, port int
 	}
 }
 
-
 func (h *EventsHandler) GetEvents(w http.ResponseWriter, r *http.Request, params api.GetEventsParams) {
-
 	var (
-		events []models.Event
-		err    error
-	)
+    events []*models.Event
+    err    error
+)
 	date := params.Date.Time
 
 	period := api.Day
@@ -86,7 +86,13 @@ func (h *EventsHandler) PostEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.application.CreateEvent(r.Context(), req.Id, req.Title); err != nil {
+event := &models.Event{
+    ID:       req.Id,
+    Title:    req.Title,
+    DateTime: time.Now(), // временно, пока не разберемся с полем
+}
+
+	if err := h.application.CreateEvent(r.Context(), event); err != nil {
 		h.logger.Error("failed to create event: " + err.Error())
 		http.Error(w, "Failed to create event", http.StatusInternalServerError)
 		return
@@ -107,22 +113,27 @@ func (h *EventsHandler) PutEventsID(w http.ResponseWriter, r *http.Request, id i
 		return
 	}
 
-	event := models.Event{
+	event := &models.Event{
 		ID:       id,
 		Title:    req.Title,
 		DateTime: req.DateTime,
 	}
-	h.application.Update(r.Context(), event)
+
+	if err := h.application.Update(r.Context(), strconv.FormatInt(id, 10), event); err != nil {
+		h.logger.Error("failed to update event: " + err.Error())
+		http.Error(w, "Failed to update event", http.StatusInternalServerError)
+		return
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
 
 func (h *EventsHandler) DeleteEventsID(w http.ResponseWriter, r *http.Request, id int64) {
-	if err := h.application.DeleteByID(r.Context(), id); err != nil {
+	if err := h.application.DeleteByID(r.Context(), strconv.FormatInt(id, 10)); err != nil {
 		h.logger.Error("failed to delete event: " + err.Error())
 		http.Error(w, "Failed to delete event", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent) 
+	w.WriteHeader(http.StatusNoContent)
 }

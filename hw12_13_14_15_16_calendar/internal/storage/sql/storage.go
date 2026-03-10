@@ -1,11 +1,13 @@
 package sqlstorage
 
 import (
+	"context"
+    "strconv"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/models"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -132,4 +134,24 @@ func (r *SQLStorage) ExecuteQuery(query string) {
 	if err != nil {
 		return
 	}
+}
+
+
+
+func (s *SQLStorage) ListEvents(ctx context.Context, from, to time.Time) ([]*models.Event, error) {
+    var events []*models.Event
+    query := `SELECT id, title, date_time FROM events WHERE date_time BETWEEN $1 AND $2`
+    err := s.db.SelectContext(ctx, &events, query, from, to)
+    return events, err
+}
+
+// DeleteEvent удаляет событие по ID (строка)
+func (s *SQLStorage) DeleteEvent(ctx context.Context, id string) error {
+    intID, err := strconv.ParseInt(id, 10, 64)
+    if err != nil {
+        return err
+    }
+    query := `DELETE FROM events WHERE id = $1`
+    _, err = s.db.ExecContext(ctx, query, intID)
+    return err
 }

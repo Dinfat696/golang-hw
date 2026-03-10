@@ -1,9 +1,9 @@
 package app
 
 import (
-    "strconv"
     "context"
     "fmt"
+    "strconv"
     "time"
 
     "github.com/google/uuid"
@@ -33,7 +33,6 @@ func (s *Scheduler) Run(ctx context.Context) error {
     ticker := time.NewTicker(s.config.Interval)
     defer ticker.Stop()
 
-    // Выполняем сразу при запуске
     if err := s.processNotifications(ctx); err != nil {
         s.logger.Error(fmt.Sprintf("Failed to process notifications: %v", err))
     }
@@ -58,7 +57,6 @@ func (s *Scheduler) Run(ctx context.Context) error {
 
 func (s *Scheduler) processNotifications(ctx context.Context) error {
     now := time.Now()
-    // Ищем события, о которых нужно уведомить в ближайший интервал
     from := now
     to := now.Add(s.config.Interval)
 
@@ -69,25 +67,24 @@ func (s *Scheduler) processNotifications(ctx context.Context) error {
 
     sentCount := 0
     for _, event := range events {
-        // Проверяем, нужно ли отправить уведомление для этого события
         if s.shouldNotify(event, now) {
             notification := &models.Notification{
                 ID:         uuid.New().String(),
                 EventID:    strconv.FormatInt(event.ID, 10),
                 EventTitle: event.Title,
-                UserID:     event.UserID,
+                UserID:     "user", // TODO: заменить на реальный userID из event
                 Message:    fmt.Sprintf("Напоминание: %s начинается в %s", event.Title, event.DateTime.Format("15:04")),
                 NotifyAt:   time.Now(),
                 CreatedAt:  time.Now(),
             }
 
             if err := s.producer.SendNotification(ctx, notification); err != nil {
-                s.logger.Error(fmt.Sprintf("Failed to send notification for event %s: %v", strconv.FormatInt(event.ID, 10), err))
+                s.logger.Error(fmt.Sprintf("Failed to send notification for event %d: %v", event.ID, err))
                 continue
             }
 
             sentCount++
-            s.logger.Info(fmt.Sprintf("Notification sent for event: %s (user: %s)", event.Title, event.UserID))
+            s.logger.Info(fmt.Sprintf("Notification sent for event: %s", event.Title))
         }
     }
 
@@ -96,19 +93,15 @@ func (s *Scheduler) processNotifications(ctx context.Context) error {
 }
 
 func (s *Scheduler) shouldNotify(event *models.Event, now time.Time) bool {
-    // Проверяем, установлено ли время напоминания и попадает ли оно в текущий интервал
-    if event.NotifyAt.IsZero() {
+    if event.DateTime.IsZero() {
         return false
     }
-
-    // Напоминание должно быть в будущем, но не дальше чем текущий интервал
-    return event.NotifyAt.After(now) && event.NotifyAt.Before(now.Add(s.config.Interval))
+    return event.DateTime.After(now) && event.DateTime.Before(now.Add(s.config.Interval))
 }
 
 func (s *Scheduler) cleanupOldEvents(ctx context.Context) error {
     cutoffTime := time.Now().Add(-s.config.CleanupOlderThan)
 
-    // Получаем старые события
     oldEvents, err := s.app.ListEvents(ctx, time.Time{}, cutoffTime)
     if err != nil {
         return fmt.Errorf("list old events: %w", err)
@@ -117,11 +110,11 @@ func (s *Scheduler) cleanupOldEvents(ctx context.Context) error {
     deletedCount := 0
     for _, event := range oldEvents {
         if err := s.app.DeleteEvent(ctx, strconv.FormatInt(event.ID, 10)); err != nil {
-            s.logger.Error(fmt.Sprintf("Failed to delete old event %s: %v", strconv.FormatInt(event.ID, 10), err))
+            s.logger.Error(fmt.Sprintf("Failed to delete old event %d: %v", event.ID, err))
             continue
         }
         deletedCount++
-        s.logger.Info(fmt.Sprintf("Deleted old event: %s (created: %s)", event.Title, event.DateTime.Format("2006-01-02")))
+        s.logger.Info(fmt.Sprintf("Deleted old event: %s", event.Title))
     }
 
     if deletedCount > 0 {

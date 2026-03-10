@@ -9,7 +9,15 @@ import (
 	"strconv"
 	"time"
 
+
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"   // для memorystorage
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/sql"      // для sqlstorage
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"      // если internalhttp находится здесь
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/api"               // для api.Handler
 )
+
 
 var configFile string
 
@@ -38,10 +46,9 @@ func main() {
 	}
 	fmt.Print(calendar)
 
-	// Создаём экземпляр хэндлера
+
 	handler := internalhttp.NewEventsHandler(logg, calendar, config.Host, config.Port)
 
-	// Генерируем HTTP-хэндлер из oapi-codegen
 	httpHandler := api.Handler(handler)
 
 	server := &http.Server{

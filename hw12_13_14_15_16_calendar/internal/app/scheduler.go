@@ -8,6 +8,10 @@ import (
 
 
 	"github.com/google/uuid"
+	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/config"
+	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
+	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/models"
+	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/mq"
 )
 
 type Scheduler struct {

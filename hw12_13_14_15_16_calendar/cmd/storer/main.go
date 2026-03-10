@@ -2,14 +2,19 @@
 package main
 
 import (
-	"context"
-	"flag"
-	"log"
-	"os"
-	"os/signal"
-	"sync"
+    "context"
+    "flag"
+    "log"
+    "os"
+    "os/signal"
+    "syscall"
+    "time"
 
- 
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/config"
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/kafka"
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
+    "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/notifications"
 )
 
 

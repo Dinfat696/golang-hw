@@ -1,3 +1,4 @@
+MODULE_DIR := hw12_13_14_15_16_calendar
 BIN := "./bin/calendar"
 DOCKER_IMG="calendar:develop"
 
@@ -5,10 +6,10 @@ GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
 build:
-	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+	cd $(MODULE_DIR) && go build -v -o ../$(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
 
 run: build
-	$(BIN) -config ./configs/config.yaml
+	$(BIN) -config ./$(MODULE_DIR)/configs/config.yaml
 
 build-img:
 	docker build \
@@ -23,11 +24,12 @@ version: build
 	$(BIN) version
 
 test:
-	go test -race ./internal/...
+	cd $(MODULE_DIR) && go test -race ./internal/...
 
 lint:
-	go vet ./...
-	go fmt ./...
-	go run honnef.co/go/tools/cmd/staticcheck@latest ./...
+	cd $(MODULE_DIR) && go mod tidy
+	cd $(MODULE_DIR) && go vet ./...
+	cd $(MODULE_DIR) && go fmt ./...
+	cd $(MODULE_DIR) && go run honnef.co/go/tools/cmd/staticcheck@latest ./...
 
 .PHONY: build run build-img run-img version test lint

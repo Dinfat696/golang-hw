@@ -84,7 +84,7 @@ func (s *PostgresNotificationStorage) GetNotifications(ctx context.Context, user
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var notifications []*models.Notification
 	for rows.Next() {

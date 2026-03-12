@@ -100,10 +100,7 @@ func (h *EventsHandler) PostEvents(w http.ResponseWriter, r *http.Request) {
         UserID      string    `json:"user_id"`
         Reminder    time.Time `json:"reminder"`
     }
-    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-        http.Error(w, "Invalid JSON", http.StatusBadRequest)
-        return
-    }
+
 
     if req.Title == "" {
         http.Error(w, "title is required", http.StatusBadRequest)
@@ -126,8 +123,10 @@ func (h *EventsHandler) PostEvents(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(map[string]string{"id": event.ID})
+   w.WriteHeader(http.StatusCreated)
+if err := json.NewEncoder(w).Encode(map[string]string{"id": event.ID}); err != nil {
+    h.logger.Error("failed to encode response: " + err.Error())
+}
 }
 
 // PutEventsID обновляет событие по ID

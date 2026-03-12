@@ -64,7 +64,7 @@ func (s *CalendarTestSuite) waitForService(url string) error {
 		case <-ticker.C:
 			resp, err := s.client.Get(url)
 			if err == nil {
-				resp.Body.Close()
+				_ = resp.Body.Close()
 				if resp.StatusCode < 500 {
 					return nil
 				}
@@ -105,7 +105,7 @@ func (s *CalendarTestSuite) TestCreateEventWithBusinessErrors() {
 		body, _ := json.Marshal(event)
 		resp, err := s.client.Post(calendarAPIURL+"/events", "application/json", bytes.NewBuffer(body))
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	})
@@ -121,7 +121,7 @@ func (s *CalendarTestSuite) TestCreateEventWithBusinessErrors() {
 		body, _ := json.Marshal(event)
 		resp, err := s.client.Post(calendarAPIURL+"/events", "application/json", bytes.NewBuffer(body))
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		require.True(t, resp.StatusCode >= 400)
 	})
@@ -134,7 +134,11 @@ func (s *CalendarTestSuite) TestCreateEventWithBusinessErrors() {
 		body, _ := json.Marshal(event)
 		resp, err := s.client.Post(calendarAPIURL+"/events", "application/json", bytes.NewBuffer(body))
 		require.NoError(t, err)
-		defer resp.Body.Close()
+		defer func() {
+			if err := resp.Body.Close(); err != nil {
+				t.Logf("failed to close response body: %v", err)
+			}
+		}()
 
 		require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	})
@@ -351,7 +355,7 @@ func (s *CalendarTestSuite) TestUpdateEvent() {
 
 	resp, err := s.client.Do(req)
 	require.NoError(s.T(), err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	require.Equal(s.T(), http.StatusOK, resp.StatusCode)
 
@@ -381,14 +385,14 @@ func (s *CalendarTestSuite) TestDeleteEvent() {
 
 	resp, err := s.client.Do(req)
 	require.NoError(s.T(), err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	require.Equal(s.T(), http.StatusOK, resp.StatusCode)
 
 	// Проверяем, что событие удалено
 	resp, err = s.client.Get(calendarAPIURL + "/events/" + created.ID)
 	require.NoError(s.T(), err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	require.Equal(s.T(), http.StatusNotFound, resp.StatusCode)
 }
@@ -396,7 +400,7 @@ func (s *CalendarTestSuite) TestDeleteEvent() {
 func (s *CalendarTestSuite) TestGetNonExistentEvent() {
 	resp, err := s.client.Get(calendarAPIURL + "/events/non-existent-id")
 	require.NoError(s.T(), err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	require.Equal(s.T(), http.StatusNotFound, resp.StatusCode)
 }
@@ -409,7 +413,7 @@ func (s *CalendarTestSuite) createEvent(event Event) Event {
 
 	resp, err := s.client.Post(calendarAPIURL+"/events", "application/json", bytes.NewBuffer(body))
 	require.NoError(s.T(), err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	require.Equal(s.T(), http.StatusCreated, resp.StatusCode)
 
@@ -429,7 +433,7 @@ func (s *CalendarTestSuite) listEvents(from, to time.Time) []Event {
 
 	resp, err := s.client.Get(url)
 	require.NoError(s.T(), err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	require.Equal(s.T(), http.StatusOK, resp.StatusCode)
 

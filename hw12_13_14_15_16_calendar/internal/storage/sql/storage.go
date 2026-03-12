@@ -105,7 +105,7 @@ func (s *Storage) ListEvents(ctx context.Context, from, to time.Time) ([]*models
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var events []*models.Event
 	for rows.Next() {

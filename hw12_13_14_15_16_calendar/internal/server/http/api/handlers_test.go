@@ -50,7 +50,11 @@ func TestBasicFunctionality(t *testing.T) {
 	server.CreateEvent(w, req)
 
 	resp := w.Result()
-	defer resp.Body.Close()
+	defer func() {
+    if err := resp.Body.Close(); err != nil {
+        t.Logf("failed to close body: %v", err)
+    }
+}()
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 }

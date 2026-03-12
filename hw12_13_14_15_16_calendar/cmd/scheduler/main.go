@@ -48,7 +48,7 @@ if err != nil {
 	} else {
 		store = memorystorage.NewStorage()
 	}
-	defer store.Close()
+    defer func() { _ = store.Close() }()
 
 	// Создаем и подключаем Kafka producer с retry
 	producer := kafka.NewProducer(cfg.Kafka.Brokers, cfg.Kafka.Topic)
@@ -59,7 +59,11 @@ if err != nil {
 	if err := producer.WaitForConnect(ctx, cfg.Kafka.MaxAttempts, cfg.Kafka.RetryBackoff); err != nil {
 		logg.Fatalf("Failed to connect to Kafka: %v", err)
 	}
-	defer producer.Close()
+defer func() {
+    if err := producer.Close(); err != nil {
+        logg.Errorf("failed to close producer: %v", err)
+    }
+}()
 
 	logg.Info("Successfully connected to Kafka")
 

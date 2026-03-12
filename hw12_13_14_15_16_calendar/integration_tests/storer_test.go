@@ -50,10 +50,11 @@ func (s *StorerTestSuite) SetupSuite() {
 
 func (s *StorerTestSuite) TearDownSuite() {
 	if s.writer != nil {
-		s.writer.Close()
+		_ = s.writer.Close()
 	}
 	if s.db != nil {
-		s.db.Close()
+		_ = s.db.Close()
+
 	}
 }
 
@@ -76,7 +77,7 @@ func (s *StorerTestSuite) waitForPostgres() error {
 					s.db = db
 					return nil
 				}
-				db.Close()
+				_ = db.Close()
 			}
 			s.T().Logf("Attempt %d/%d: PostgreSQL not ready yet...", i+1, maxRetries)
 		}
@@ -99,7 +100,7 @@ func (s *StorerTestSuite) waitForKafka() error {
 		case <-ticker.C:
 			conn, err := kafka.DialContext(ctx, "tcp", kafkaBroker)
 			if err == nil {
-				conn.Close()
+				_ = conn.Close()
 				return nil
 			}
 			s.T().Logf("Attempt %d/%d: Kafka not ready yet...", i+1, maxRetries)

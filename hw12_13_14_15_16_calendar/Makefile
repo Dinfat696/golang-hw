@@ -54,8 +54,12 @@ test:
 	@go test -race -v ./internal/...
 
 ## lint: Run linter
+.PHONY: tidy
+tidy:
+	go mod tidy
+
 .PHONY: lint
-lint:
+lint: tidy
 	@echo "Running linter..."
 	@go vet ./...
 	@gofmt -l . | (! grep .)

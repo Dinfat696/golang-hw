@@ -3,59 +3,103 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	// для api.Handler
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/config"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http"
+	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http" // если internalhttp находится здесь
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage"
 	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/memory"
+	sqlstorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/sql"
+	// для memorystorage
+	// для sqlstorage
 )
 
-var configFile string
+var (
+	configFile  string
+	showVersion bool
+)
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "configs/config.yaml", "Path to configuration file")
+	flag.BoolVar(&showVersion, "version", false, "Show version information")
 }
 
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" {
+	if showVersion {
 		printVersion()
-		return
+		os.Exit(0)
 	}
 
-	config := NewConfig()
-	logg := logger.New(config.Logger.Level)
+	cfg, err := config.LoadConfig(configFile)
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
 
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
+	logg, err := logger.NewLogger(cfg.Logger.Level)
+	if err != nil {
+		log.Fatalf("Failed to create logger: %v", err)
+	}
 
-	server := internalhttp.NewServer(logg, calendar)
-
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
-	defer cancel()
-
-	go func() {
-		<-ctx.Done()
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
+	store, err := initStorage(cfg, logg)
+	if err != nil {
+		logg.Fatalf("Failed to initialize storage: %v", err)
+	}
+	defer func() {
+		if err := store.Close(); err != nil {
+			logg.Errorf("Failed to close storage: %v", err)
 		}
 	}()
 
-	logg.Info("calendar is running...")
+	calendarApp := app.New(logg, store)
 
-	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
-		cancel()
-		os.Exit(1) //nolint:gocritic
+	httpServer := internalhttp.NewServer(calendarApp, cfg.Server.Host, cfg.Server.Port)
+
+	// Запускаем сервер в горутине для graceful shutdown.
+	go func() {
+		logg.Info("Starting calendar service...")
+		if err := httpServer.Start(); err != nil {
+			logg.Error("Failed to start server: " + err.Error())
+			os.Exit(1)
+		}
+	}()
+
+	// Ожидаем сигналы для graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logg.Info("Shutting down server...")
+
+	// Graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := httpServer.Stop(ctx); err != nil {
+		logg.Error("Failed to stop server gracefully: " + err.Error())
 	}
+
+	logg.Info("Server stopped")
+}
+
+func initStorage(cfg *config.Config, logg *logger.Logger) (storage.Storage, error) {
+	if cfg.Storage.Type == "sql" {
+		store, err := sqlstorage.NewStorage(cfg.Storage.DSN)
+		if err != nil {
+			return nil, err
+		}
+		logg.Info("SQL storage initialized")
+		return store, nil
+	}
+
+	logg.Info("In-memory storage initialized")
+	return memorystorage.NewStorage(), nil
 }

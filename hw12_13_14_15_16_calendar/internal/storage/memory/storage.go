@@ -10,16 +10,15 @@ import (
 )
 
 type MemoryStorage struct {
-    mu     sync.RWMutex
-    events map[string]*models.Event
+	mu     sync.RWMutex
+	events map[string]*models.Event
 }
 
 func NewStorage() *MemoryStorage {
-    return &MemoryStorage{
-        events: make(map[string]*models.Event),
-    }
+	return &MemoryStorage{
+		events: make(map[string]*models.Event),
+	}
 }
-
 
 func (s *MemoryStorage) CreateEvent(ctx context.Context, event *models.Event) error {
 	s.mu.Lock()

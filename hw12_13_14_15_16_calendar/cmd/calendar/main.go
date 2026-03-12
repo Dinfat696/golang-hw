@@ -15,8 +15,8 @@ import (
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
 	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http" // если internalhttp находится здесь
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage"
+	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/memory"
 	sqlstorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/sql"
-    memorystorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/memory"
 	// для memorystorage
 	// для sqlstorage
 )
@@ -91,15 +91,15 @@ func main() {
 }
 
 func initStorage(cfg *config.Config, logg *logger.Logger) (storage.Storage, error) {
-    if cfg.Storage.Type == "sql" {
-        store, err := sqlstorage.NewStorage(cfg.Storage.DSN)
-        if err != nil {
-            return nil, err
-        }
-        logg.Info("SQL storage initialized")
-        return store, nil
-    }
+	if cfg.Storage.Type == "sql" {
+		store, err := sqlstorage.NewStorage(cfg.Storage.DSN)
+		if err != nil {
+			return nil, err
+		}
+		logg.Info("SQL storage initialized")
+		return store, nil
+	}
 
-    logg.Info("In-memory storage initialized")
-    return memorystorage.NewStorage(), nil
+	logg.Info("In-memory storage initialized")
+	return memorystorage.NewStorage(), nil
 }

@@ -40,15 +40,15 @@ func main() {
 	var store storage.Storage
 	if cfg.Storage.Type == "sql" {
 		// Для SQL нужно передать driverName (например, "postgres") и DSN
-	store, err = sqlstorage.NewStorage(cfg.Storage.DSN)
-if err != nil {
-    logg.Fatalf("Failed to create sql storage: %v", err)
-}
+		store, err = sqlstorage.NewStorage(cfg.Storage.DSN)
+		if err != nil {
+			logg.Fatalf("Failed to create sql storage: %v", err)
+		}
 		// Если у структуры SQLStorage есть метод Close, он будет вызван позже через defer
 	} else {
 		store = memorystorage.NewStorage()
 	}
-    defer func() { _ = store.Close() }()
+	defer func() { _ = store.Close() }()
 
 	// Создаем и подключаем Kafka producer с retry
 	producer := kafka.NewProducer(cfg.Kafka.Brokers, cfg.Kafka.Topic)
@@ -59,11 +59,11 @@ if err != nil {
 	if err := producer.WaitForConnect(ctx, cfg.Kafka.MaxAttempts, cfg.Kafka.RetryBackoff); err != nil {
 		logg.Fatalf("Failed to connect to Kafka: %v", err)
 	}
-defer func() {
-    if err := producer.Close(); err != nil {
-        logg.Errorf("failed to close producer: %v", err)
-    }
-}()
+	defer func() {
+		if err := producer.Close(); err != nil {
+			logg.Errorf("failed to close producer: %v", err)
+		}
+	}()
 
 	logg.Info("Successfully connected to Kafka")
 

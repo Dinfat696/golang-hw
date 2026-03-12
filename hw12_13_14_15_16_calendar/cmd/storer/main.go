@@ -41,10 +41,10 @@ func main() {
 		logg.Fatalf("Failed to create notification storage: %v", err)
 	}
 	defer func() {
-    if err := notificationStore.Close(); err != nil {
-        log.Printf("failed to close notification store: %v", err)
-    }
-}()
+		if err := notificationStore.Close(); err != nil {
+			log.Printf("failed to close notification store: %v", err)
+		}
+	}()
 
 	// Создаем и подключаем Kafka consumer с retry
 	consumer := kafka.NewConsumer(cfg.Kafka.Brokers, cfg.Kafka.Topic, cfg.Kafka.GroupID)
@@ -52,15 +52,14 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	defer func() {
-    if err := consumer.Close(); err != nil {
-        log.Printf("failed to close consumer: %v", err)
-    }
-}()
+		if err := consumer.Close(); err != nil {
+			log.Printf("failed to close consumer: %v", err)
+		}
+	}()
 
 	if err := consumer.WaitForConnect(ctx, cfg.Kafka.MaxAttempts, cfg.Kafka.RetryBackoff); err != nil {
 		logg.Fatalf("Failed to connect to Kafka: %v", err)
 	}
-
 
 	logg.Info("Successfully connected to Kafka")
 

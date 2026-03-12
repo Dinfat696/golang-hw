@@ -51,10 +51,10 @@ func TestBasicFunctionality(t *testing.T) {
 
 	resp := w.Result()
 	defer func() {
-    if err := resp.Body.Close(); err != nil {
-        t.Logf("failed to close body: %v", err)
-    }
-}()
+		if err := resp.Body.Close(); err != nil {
+			t.Logf("failed to close body: %v", err)
+		}
+	}()
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 }

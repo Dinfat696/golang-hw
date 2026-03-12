@@ -1,11 +1,22 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrDateBusy      = errors.New("time slot is already busy")
+	ErrEventNotFound = errors.New("event not found")
+	ErrInvalidEvent  = errors.New("invalid event data")
+)
 
 type Event struct {
-	ID       int64     `db:"id"`
-	Title    string    `db:"title"`
-	DateTime time.Time `db:"date_time"` // время проведения события
-	UserID   string    `db:"user_id"`   // владелец события
-	NotifyAt time.Time `db:"notify_at"` // время отправки уведомления
+	ID          string    `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	StartTime   time.Time `json:"start_time"`
+	EndTime     time.Time `json:"end_time"`
+	UserID      string    `json:"user_id"`
+	Reminder    time.Time `json:"reminder"`
 }

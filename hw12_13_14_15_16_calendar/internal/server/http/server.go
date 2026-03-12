@@ -2,75 +2,101 @@ package internalhttp
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http/api"
+	"github.com/gorilla/mux"
 )
 
 type Server struct {
-	host        string
-	port        int
-	logger      *logger.Logger
-	application *app.App
+	server *http.Server
+	app    *app.App
 }
 
-func NewServer(logger *logger.Logger, app *app.App, host string, port int) *Server {
-	return &Server{
-		host:        host,
-		port:        port,
-		logger:      logger,
-		application: app,
-	}
-}
+func NewServer(app *app.App, host string, port int) *Server {
+	s := &Server{app: app}
+	router := s.setupRouter()
 
-func (s *Server) Start(ctx context.Context) error {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/openapi.yaml", swagger)
-
-	srv := &http.Server{
-		Addr:         s.host + ":" + strconv.Itoa(s.port),
-		Handler:      mux,
-		ReadTimeout:  5 * time.Second,
+	s.server = &http.Server{
+		Addr:         fmt.Sprintf("%s:%d", host, port),
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
 
-	errCh := make(chan error, 1)
-	go func() {
-		errCh <- srv.ListenAndServe()
-	}()
+	return s
+}
 
-	select {
-	case <-ctx.Done():
+func (s *Server) setupRouter() *mux.Router {
+	router := mux.NewRouter()
 
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
+	// API routes
+	apiServer := api.NewServer(s.app)
+	apiRouter := router.PathPrefix("/api").Subrouter()
+	api.HandlerFromMux(apiServer, apiRouter)
 
-		if err := srv.Shutdown(shutdownCtx); err != nil {
-			return fmt.Errorf("graceful shutdown failed: %w", err)
-		}
-		return nil
+	// Health check endpoint
+	router.HandleFunc("/health", s.healthCheckHandler).Methods("GET")
 
-	case err := <-errCh:
+	// OpenAPI specification
+	router.HandleFunc("/openapi.yaml", s.openAPIHandler).Methods("GET")
 
-		if !errors.Is(err, http.ErrServerClosed) {
-			return fmt.Errorf("server failed to start or crashed: %w", err)
-		}
-		return nil
+	// Apply middleware
+	router.Use(loggingMiddleware)
+	router.Use(corsMiddleware)
+
+	return router
+}
+
+func (s *Server) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	response := map[string]string{
+		"status": "ok",
+		"time":   time.Now().Format(time.RFC3339),
+	}
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
 
-func (s *Server) Stop(ctx context.Context) error {
-	fmt.Println(ctx)
-	return nil
+func (s *Server) openAPIHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./api/openapi.yaml")
 }
 
-func swagger(w http.ResponseWriter, req *http.Request) {
-	http.ServeFile(w, req, "openapi.yaml")
+func (s *Server) Start() error {
+	return s.server.ListenAndServe()
+}
+
+func (s *Server) Stop(ctx context.Context) error {
+	return s.server.Shutdown(ctx)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Логирование запросов
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		duration := time.Since(start)
+		fmt.Printf("%s %s %s\n", r.Method, r.URL.Path, duration)
+	})
+}
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

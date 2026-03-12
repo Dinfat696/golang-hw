@@ -40,10 +40,13 @@ func main() {
 	var store storage.Storage
 	if cfg.Storage.Type == "sql" {
 		// Для SQL нужно передать driverName (например, "postgres") и DSN
-		store = sqlstorage.New("postgres", cfg.Storage.DSN)
+	store, err = sqlstorage.NewStorage(cfg.Storage.DSN)
+if err != nil {
+    logg.Fatalf("Failed to create sql storage: %v", err)
+}
 		// Если у структуры SQLStorage есть метод Close, он будет вызван позже через defer
 	} else {
-		store = memorystorage.New()
+		store = memorystorage.NewStorage()
 	}
 	defer store.Close()
 

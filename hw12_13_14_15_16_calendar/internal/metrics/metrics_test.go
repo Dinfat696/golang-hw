@@ -38,11 +38,11 @@ func TestMetricsEndpoint(t *testing.T) {
 	handler.ServeHTTP(w, req)
 
 	resp := w.Result()
-defer func() {
-    if err := resp.Body.Close(); err != nil {
-        t.Fatalf("failed to close response body: %v", err)
-    }
-}()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Fatalf("failed to close response body: %v", err)
+		}
+	}()
 
 	// Проверяем статус код
 	if resp.StatusCode != http.StatusOK {
@@ -111,11 +111,11 @@ func TestMetricIncrement(t *testing.T) {
 	handler.ServeHTTP(w, req)
 
 	resp := w.Result()
-defer func() {
-    if err := resp.Body.Close(); err != nil {
-        t.Fatalf("failed to close response body: %v", err)
-    }
-}()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Fatalf("failed to close response body: %v", err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

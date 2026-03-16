@@ -50,10 +50,10 @@ func main() {
 		store = memorystorage.NewStorage() // <-- ИСПРАВЛЕНО: memory. → memorystorage.
 	}
 	defer func() {
-    if err := store.Close(); err != nil {
-        logg.Errorf("failed to close storage: %v", err)
-    }
-}()
+		if err := store.Close(); err != nil {
+			logg.Errorf("failed to close storage: %v", err)
+		}
+	}()
 
 	// Создаем и подключаем Kafka producer с retry
 	producer := kafka.NewProducer(cfg.Kafka.Brokers, cfg.Kafka.Topic)
@@ -65,10 +65,10 @@ func main() {
 		logg.Fatalf("Failed to connect to Kafka: %v", err)
 	}
 	defer func() {
-    if err := store.Close(); err != nil {
-        logg.Errorf("failed to close storage: %v", err)
-    }
-}()
+		if err := store.Close(); err != nil {
+			logg.Errorf("failed to close storage: %v", err)
+		}
+	}()
 
 	logg.Info("Successfully connected to Kafka")
 

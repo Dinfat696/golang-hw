@@ -9,18 +9,21 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/metrics"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
 )
 
 // Server реализует сгенерированные интерфейсы сервера для gorilla/mux
 type Server struct {
-	app *app.App
+	app     *app.App
+	metrics *metrics.Metrics
 }
 
 // NewServer создает новый обработчик для gorilla/mux
-func NewServer(app *app.App) *Server {
+func NewServer(app *app.App, metrics *metrics.Metrics) *Server {
 	return &Server{
-		app: app,
+		app:     app,
+		metrics: metrics,
 	}
 }
 
@@ -38,6 +41,9 @@ func (s *Server) ListEvents(w http.ResponseWriter, r *http.Request) {
 		s.sendError(w, http.StatusInternalServerError, "Failed to list events", err)
 		return
 	}
+
+	// Увеличиваем счетчик запросов списка событий
+	s.metrics.IncEventsQueried()
 
 	apiEvents := make([]Event, len(events))
 	for i, event := range events {
@@ -83,6 +89,9 @@ func (s *Server) CreateEvent(w http.ResponseWriter, r *http.Request) {
 		s.sendError(w, http.StatusInternalServerError, "Failed to create event", err)
 		return
 	}
+
+	// Увеличиваем счетчик созданных событий
+	s.metrics.IncEventCreated()
 
 	s.sendJSON(w, http.StatusCreated, s.convertToAPIEvent(event))
 }
@@ -155,6 +164,9 @@ func (s *Server) UpdateEvent(w http.ResponseWriter, r *http.Request, id string) 
 		return
 	}
 
+	// Увеличиваем счетчик обновленных событий
+	s.metrics.IncEventUpdated()
+
 	s.sendJSON(w, http.StatusOK, s.convertToAPIEvent(updatedEvent))
 }
 
@@ -179,6 +191,9 @@ func (s *Server) DeleteEvent(w http.ResponseWriter, r *http.Request, id string) 
 		s.sendError(w, http.StatusInternalServerError, "Failed to delete event", err)
 		return
 	}
+
+	// Увеличиваем счетчик удаленных событий
+	s.metrics.IncEventDeleted()
 
 	success := true
 	message := "Event deleted successfully"

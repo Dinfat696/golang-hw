@@ -13,8 +13,9 @@ import (
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/config"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/kafka"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/metrics" // <-- ДОБАВЛЕНО
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/memory"
+	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/memory" // <-- РАСКОММЕНТИРОВАНО
 	sqlstorage "github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/storage/sql"
 )
 
@@ -39,16 +40,20 @@ func main() {
 
 	var store storage.Storage
 	if cfg.Storage.Type == "sql" {
-		// Для SQL нужно передать driverName (например, "postgres") и DSN
-		store, err = sqlstorage.NewStorage(cfg.Storage.DSN)
+		// Используем sqlstorage (алиас для internal/storage/sql)
+		store, err = sqlstorage.NewStorage(cfg.Storage.DSN) // <-- ИСПРАВЛЕНО: sql. → sqlstorage.
 		if err != nil {
-			logg.Fatalf("Failed to create sql storage: %v", err)
+			logg.Fatalf("Failed to create SQL storage: %v", err)
 		}
-		// Если у структуры SQLStorage есть метод Close, он будет вызван позже через defer
 	} else {
-		store = memorystorage.NewStorage()
+		// Используем memorystorage (алиас для internal/storage/memory)
+		store = memorystorage.NewStorage() // <-- ИСПРАВЛЕНО: memory. → memorystorage.
 	}
-	defer func() { _ = store.Close() }()
+	defer func() {
+    if err := store.Close(); err != nil {
+        logg.Errorf("failed to close storage: %v", err)
+    }
+}()
 
 	// Создаем и подключаем Kafka producer с retry
 	producer := kafka.NewProducer(cfg.Kafka.Brokers, cfg.Kafka.Topic)
@@ -60,15 +65,16 @@ func main() {
 		logg.Fatalf("Failed to connect to Kafka: %v", err)
 	}
 	defer func() {
-		if err := producer.Close(); err != nil {
-			logg.Errorf("failed to close producer: %v", err)
-		}
-	}()
+    if err := store.Close(); err != nil {
+        logg.Errorf("failed to close storage: %v", err)
+    }
+}()
 
 	logg.Info("Successfully connected to Kafka")
 
 	calendarApp := app.New(logg, store)
-	scheduler := app.NewScheduler(calendarApp, producer, logg, cfg.Scheduler)
+	metricsInstance := metrics.NewMetrics() // <-- ТЕПЕРЬ РАБОТАЕТ, ТАК КАК ДОБАВЛЕН ИМПОРТ
+	scheduler := app.NewScheduler(calendarApp, producer, logg, cfg.Scheduler, metricsInstance)
 
 	// Graceful shutdown
 	mainCtx, mainCancel := context.WithCancel(context.Background())

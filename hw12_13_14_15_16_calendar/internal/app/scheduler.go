@@ -7,6 +7,7 @@ import (
 
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/config"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/metrics"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/mq"
 	"github.com/google/uuid"
@@ -17,20 +18,25 @@ type Scheduler struct {
 	producer mq.Producer
 	logger   *logger.Logger
 	config   config.SchedulerConfig
+	metrics  *metrics.Metrics
 }
 
-func NewScheduler(app *App, producer mq.Producer, logger *logger.Logger, config config.SchedulerConfig) *Scheduler {
+func NewScheduler(app *App, producer mq.Producer, logger *logger.Logger, config config.SchedulerConfig, metrics *metrics.Metrics) *Scheduler {
 	return &Scheduler{
 		app:      app,
 		producer: producer,
 		logger:   logger,
 		config:   config,
+		metrics:  metrics,
 	}
 }
 
 func (s *Scheduler) Run(ctx context.Context) error {
 	ticker := time.NewTicker(s.config.Interval)
 	defer ticker.Stop()
+
+	// Увеличиваем счетчик запусков планировщика
+	s.metrics.IncSchedulerRun()
 
 	// Выполняем сразу при запуске
 	if err := s.processNotifications(ctx); err != nil {
@@ -45,6 +51,9 @@ func (s *Scheduler) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return nil
 		case <-ticker.C:
+			// Увеличиваем счетчик запусков планировщика
+			s.metrics.IncSchedulerRun()
+
 			if err := s.processNotifications(ctx); err != nil {
 				s.logger.Errorf("Failed to process notifications: %v", err)
 			}
@@ -82,9 +91,13 @@ func (s *Scheduler) processNotifications(ctx context.Context) error {
 
 			if err := s.producer.SendNotification(ctx, notification); err != nil {
 				s.logger.Errorf("Failed to send notification for event %s: %v", event.ID, err)
+				// Увеличиваем счетчик неудачных отправок уведомлений
+				s.metrics.IncNotificationFailed()
 				continue
 			}
 
+			// Увеличиваем счетчик отправленных уведомлений
+			s.metrics.IncNotificationSent()
 			sentCount++
 			s.logger.Infof("Notification sent for event: %s (user: %s)", event.Title, event.UserID)
 		}

@@ -11,6 +11,7 @@ import (
 
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/logger"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/metrics"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/models"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -29,8 +30,11 @@ func TestBasicFunctionality(t *testing.T) {
 	// Создаем приложение
 	app := app.New(testLogger, mockStorage)
 
+	// Создаем метрики
+	testMetrics := metrics.NewMetrics()
+
 	// Создаем сервер
-	server := NewServer(app)
+	server := NewServer(app, testMetrics)
 
 	// Тест создания события
 	eventReq := CreateEventRequest{
@@ -51,10 +55,10 @@ func TestBasicFunctionality(t *testing.T) {
 
 	resp := w.Result()
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			t.Logf("failed to close body: %v", err)
-		}
-	}()
+    if err := resp.Body.Close(); err != nil {
+        t.Fatalf("failed to close response body: %v", err)
+    }
+}()
 
 	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 }

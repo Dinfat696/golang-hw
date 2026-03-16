@@ -8,17 +8,23 @@ import (
 	"time"
 
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/app"
+	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/metrics"
 	"github.com/fixme_my_friend/hw12_13_14_15_16_calendar/internal/server/http/api"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 type Server struct {
-	server *http.Server
-	app    *app.App
+	server  *http.Server
+	app     *app.App
+	metrics *metrics.Metrics
 }
 
 func NewServer(app *app.App, host string, port int) *Server {
-	s := &Server{app: app}
+	s := &Server{
+		app:     app,
+		metrics: metrics.NewMetrics(),
+	}
 	router := s.setupRouter()
 
 	s.server = &http.Server{
@@ -36,17 +42,21 @@ func (s *Server) setupRouter() *mux.Router {
 	router := mux.NewRouter()
 
 	// API routes
-	apiServer := api.NewServer(s.app)
+	apiServer := api.NewServer(s.app, s.metrics)
 	apiRouter := router.PathPrefix("/api").Subrouter()
 	api.HandlerFromMux(apiServer, apiRouter)
 
 	// Health check endpoint
 	router.HandleFunc("/health", s.healthCheckHandler).Methods("GET")
 
+	// Metrics endpoint
+	router.Handle("/metrics", promhttp.Handler()).Methods("GET")
+
 	// OpenAPI specification
 	router.HandleFunc("/openapi.yaml", s.openAPIHandler).Methods("GET")
 
 	// Apply middleware
+	router.Use(s.metricsMiddleware)
 	router.Use(loggingMiddleware)
 	router.Use(corsMiddleware)
 
@@ -99,4 +109,32 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (s *Server) metricsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		// Создаем обертку для захвата статуса ответа
+		wrapped := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+
+		next.ServeHTTP(wrapped, r)
+
+		duration := time.Since(start).Seconds()
+
+		// Записываем метрики
+		s.metrics.IncHTTPRequest(r.Method, r.URL.Path, http.StatusText(wrapped.statusCode))
+		s.metrics.ObserveHTTPRequestDuration(r.Method, r.URL.Path, duration)
+	})
+}
+
+// responseWriter - обертка для захвата статуса ответа
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
 }

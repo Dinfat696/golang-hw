@@ -1,52 +1,53 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
+	"bufio"
+	"bytes"
 	"io"
 	"strings"
 )
 
-type User struct {
-	ID       int
-	Name     string
-	Username string
-	Email    string
-	Phone    string
-	Password string
-	Address  string
-}
-
 type DomainStat map[string]int
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	dec := json.NewDecoder(r)
-	result := make(DomainStat)
+	scanner := bufio.NewScanner(r)
+	result := make(DomainStat, 1000) // предвыделение памяти
 	suffix := "." + domain
+	emailPrefix := []byte(`"Email":"`)
 
-	for {
-		var u User
-		err := dec.Decode(&u)
-		if errors.Is(err, io.EOF) { // исправлено
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("decode error: %w", err)
-		}
-
-		if u.Email == "" {
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		// Ищем начало поля Email
+		idx := bytes.Index(line, emailPrefix)
+		if idx == -1 {
 			continue
 		}
-
-		email := strings.ToLower(u.Email)
-		if strings.HasSuffix(email, suffix) {
-			emailSlice := strings.Split(email, "@")
-			if len(emailSlice) == 2 {
-				result[emailSlice[1]]++
-			}
+		start := idx + len(emailPrefix)
+		if start >= len(line) {
+			continue
 		}
+		// Ищем закрывающую кавычку
+		end := bytes.IndexByte(line[start:], '"')
+		if end == -1 {
+			continue
+		}
+		emailBytes := line[start : start+end]
+		email := strings.ToLower(string(emailBytes))
+
+		// Проверяем окончание на нужный домен
+		if !strings.HasSuffix(email, suffix) {
+			continue
+		}
+		atIndex := strings.LastIndexByte(email, '@')
+		if atIndex == -1 {
+			continue
+		}
+		domainName := email[atIndex+1:]
+		result[domainName]++
 	}
 
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
 	return result, nil
 }
